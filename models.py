@@ -1,13 +1,16 @@
-import sqlalchemy
+import sqlalchemy as sa
+from sqlalchemy import orm
+from typing import List
 
-class User(db.model):
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    user_id = db.Column(db.Integer, primary_key=True)
+class Base(orm.DeclarativeBase):
+    pass
+
+class User(Base):
+    username: orm.Mapped[str] = orm.mapped_column(unique=True, nullable=False)
+    password: orm.Mapped[str] = orm.mapped_column(nullable=False)
+    id: orm.Mapped[int] = orm.mapped_column(primary_key=True)
+
+    tasks: orm.Mapped[List["Task"]] = orm.relationship(back_populate="owner")
 
 
-class Task:
-    def __init__(self, content, flag, key):
-        self.content = content
-        self.flag = flag
-        self.
+class Task(Base):
