@@ -22,5 +22,6 @@ class Task(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
     content: Mapped[str] = mapped_column(nullable=False)
     priority: Mapped[int] = mapped_column(nullable=True)
+    isCompleted: Mapped[bool] = mapped_column()
 
     owner: Mapped["User"] = relationship(back_populates="tasks")
