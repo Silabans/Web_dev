@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/home')
 def home():
     return  render_template('index.html')
 
@@ -61,6 +61,36 @@ def register():
             session.close()
     
     return render_template("register.html")
+
+
+@app.route('/add', method=["POST"])
+def add_task():
+    content = request.form.get("content")
+    priority = request.form.get("priority")
+
+    if not content:
+        return "Task content cannot be empty!", 400
+    
+    with SessionLocal() as session:
+        try:
+            new_task = Task(
+                content=content,
+                priority=int(priority) if priority else 1
+                user_id=1
+            )
+            session.add(new_task)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            return f"An error occurred: {e}"
+    
+    return redirect(url_for('home'))
+
+
+
+
+#@app.route('complete-task/<int:task-id>')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
