@@ -1,8 +1,11 @@
 from sqlalchemy import create_engine
-from models import Base, User, Task
+from sqlalchemy.orm import sessionmaker
+from models import Base
 
 engine = create_engine("sqlite:///todo.db", echo=True)
 #Creates an engine (an sql file - todo.db) in which the databases will be stored
+
+SessionLocal = sessionmaker(bind=engine) #This creates a 'factory' for sessions 
 
 def create_db():
     Base.metadata.create_all(engine)
