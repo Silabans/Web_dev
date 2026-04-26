@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
     <div id="taskModal" class="modal">
         <form action="/add" method="POST" class="task-form"
             <h2>New Task</h2>
@@ -9,9 +12,9 @@
 
             <label for="priority">Level of Priority</label>
             <select name="priority" id="priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
             </select>
 
             <label for="due_date">Due Date</label>
@@ -23,6 +26,20 @@
             </div>
         </form>
     </div>
+
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <strong>{{ task.content }}</strong>
+
+            <span class="badge-{{ task.priority_label.lower() }}">Priority: {{ task.priority_label }}</span>
+
+            <span class="badge-{{ task.priority_label.lower()}}">Due Date: {{ task.due_date }}</span>
+
+            <span class="badge-{{ task.priority_label.lower() }}">Status: {{ "Done" if task.isCompleted else "Pending"}}</span>
+        </li>
+        {% endfor %}
+    </ul>
 
 
 </html>
