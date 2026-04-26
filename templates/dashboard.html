@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <div id="taskModal" class="modal">
+        <form action="/add" method="POST" class="task-form"
+            <h2>New Task</h2>
+
+            <label for="content">Task Content</label>
+            <input type="text" name="content" placeholder="e.g. Finish Flask UI" required>
+
+            <label for="priority">Level of Priority</label>
+            <select name="priority" id="priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+
+            <label for="due_date">Due Date</label>
+            <input type="date" name="due_date">
+
+            <div class="form-actions">
+                <button type="button" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="primary-button">Create Task</button>
+            </div>
+        </form>
+    </div>
+
+
+</html>
