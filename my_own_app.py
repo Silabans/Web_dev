@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from database import SessionLocal
-from models import User
+from models import User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-@app.route('/home')
+@app.route('/')
 def home():
     return  render_template('index.html')
 
@@ -67,24 +67,22 @@ def register():
 def add_task():
     content = request.form.get("content")
     priority = request.form.get("priority")
+    due_date = request.form.get("due_date")
 
     if not content:
         return "Task content cannot be empty!", 400
     
     with SessionLocal() as session:
         try:
-            new_task = Task(
-                content=content,
-                priority=int(priority) if priority else 1
-                user_id=1
-            )
+            new_task = Task(content=content, priority=int(priority) if priority else 1, due_date=due_date, user_id=1)
+            
             session.add(new_task)
             session.commit()
         except Exception as e:
             session.rollback()
             return f"An error occurred: {e}"
     
-    return redirect(url_for('home'))
+    return redirect(url_for('dashboard'))
 
 
 
