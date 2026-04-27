@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from database import SessionLocal
 from models import User, Task
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "super-secret-app-do-not-share"
 
 @app.route('/')
 def home():
@@ -19,17 +20,19 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        session = SessionLocal()
-        user = session.query(User).filter_by(username=username).first()
+        db_session = SessionLocal()
+        user = db_session.query(User).filter_by(username=username).first()
 
         if user:
             if user.password == password:
-                session.close()
+                session['user_id'] = user.id
+                db_session.close()
                 #print(f"Welcome back, {username}!")
                 return redirect(url_for('dashboard'))
         
-        session.close()
-        return "Invalid credentials!\nNote: if you've never created an account before click 'Register' down below!" 
+        db_session.close()
+        return """Invalid credentials!
+        Note: if you've never created an account before click 'Register' down below!""" 
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -42,55 +45,67 @@ def register():
         if password != confirm_password:
             return "Passwords do not match"
         
-        session = SessionLocal()
-
-        user_exists = session.query(User).filter_by(username=username).first()
-        if user_exists:
-            session.close()
-            return "Username already taken!"
-        
-        new_user = User(username=username, password=password)
-        
-        try:
-            session.add(new_user)
-            session.commit()
-            return redirect(url_for('login'))
-        except Exception as e:
-            session.rollback()
-            return f"An error occurred: {e}"
-        finally:
-            session.close()
+        with SessionLocal() as db_session:
+            user_exists = db_session.query(User).filter_by(username=username).first()
+            if user_exists:
+                db_session.close()
+                return "Username already taken!"
+            
+            new_user = User(username=username, password=password)
+            
+            try:
+                db_session.add(new_user)
+                db_session.commit()
+                return redirect(url_for('login'))
+            except Exception as e:
+                db_session.rollback()
+                return f"An error occurred: {e}"
     
     return render_template("register.html")
 
 
 @app.route('/add', methods=["POST"])
 def add_task():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_id = session.get('user)')
+    
     content = request.form.get("content")
     priority = request.form.get("priority")
     due_date = request.form.get("due_date")
-
     if not content:
         return "Task content cannot be empty!", 400
     
-    with SessionLocal() as session:
+    with SessionLocal() as db_session:
         try:
-            new_task = Task(content=content, priority=int(priority) if priority else 1, due_date=due_date, user_id=1)
+            new_task = Task(content=content, priority=int(priority) if priority else 1, due_date=due_date, user_id=user_id)
             
-            session.add(new_task)
-            session.commit()
+            db_session.add(new_task)
+            db_session.commit()
         except Exception as e:
-            session.rollback()
+            db_session.rollback()
             return f"An error occurred: {e}"
     
     return redirect(url_for('dashboard'))
 
 @app.route('/dashboard', methods=["GET", "POST"])
 def dashboard():
-    session = SessionLocal()
-    tasks = session.query(Task).filter_by(user_id=1).all()
-    session.close()
-    return render_template('dashboard.html', tasks=tasks)
+    if 'user_id' not in session:
+        return(redirect(url_for('login')))
+    
+    user_id = session['user_id']
+
+    with SessionLocal() as local_session:
+        # makes a query to the database of the task class of the current session, 
+        # returning all task objects associated with the user_id
+        tasks = local_session.query(Task).filter_by(user_id=user_id).all()
+        return render_template('dashboard.html', tasks=tasks)
+    
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return redirect(url_for('login'))
 
 
 #@app.route('complete-task/<int:task-id>')
