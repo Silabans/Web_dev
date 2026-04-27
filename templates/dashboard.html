@@ -3,43 +3,51 @@
     <head>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     </head>
-    <div id="taskModal" class="modal">
-        <form action="/add" method="POST" class="task-form"
-            <h2>New Task</h2>
+    <body>
+        <div id="taskModal" class="modal">
+            <form action="/add" method="POST" class="task-form">
+                <h2>New Task</h2>
 
-            <label for="content">Task Content</label>
-            <input type="text" name="content" placeholder="e.g. Finish Flask UI" required>
+                <div>
+                    <label for="content">Task Content</label>
+                    <input type="text" name="content" placeholder="e.g. Finish Flask UI" required>
+                </div>
+                
+                <div>
+                    <label for="priority">Level of Priority</label>
+                    <select name="priority" id="priority">
+                        <option value="1">Low</option>
+                        <option value="2">Medium</option>
+                        <option value="3">High</option>
+                    </select>
+                </div>
 
-            <label for="priority">Level of Priority</label>
-            <select name="priority" id="priority">
-                <option value="1">Low</option>
-                <option value="2">Medium</option>
-                <option value="3">High</option>
-            </select>
+                <div>
+                    <label for="due_date">Due Date</label>
+                    <input type="date" name="due_date">
+                </div>
 
-            <label for="due_date">Due Date</label>
-            <input type="date" name="due_date">
+                <div class="form-actions">
+                    <button type="button" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="primary-button">Create Task</button>
+                </div>
+            </form>
+        </div>
 
-            <div class="form-actions">
-                <button type="button" onclick="closeModal()">Cancel</button>
-                <button type="submit" class="primary-button">Create Task</button>
-            </div>
-        </form>
-    </div>
-
-    <ul>
-        {% for task in tasks %}
-        <li>
-            <strong>{{ task.content }}</strong>
-
-            <span class="badge-{{ task.priority_label.lower() }}">Priority: {{ task.priority_label }}</span>
-
-            <span class="badge-{{ task.priority_label.lower()}}">Due Date: {{ task.due_date }}</span>
-
-            <span class="badge-{{ task.priority_label.lower() }}">Status: {{ "Done" if task.isCompleted else "Pending"}}</span>
-        </li>
-        {% endfor %}
-    </ul>
-
-
+        <div>
+            <h2>Your Tasks</h2>
+            {% if tasks %}
+                {% for task in tasks %}
+                    <div class="task-card" style="border-left: 5px solid {% if task.priority == 3 %}red{% elif task.priority == 2 %}orange{% else %}green{% endif %}; padding: 7px; margin-bottom: 20px; background: #b9dded;border-radius: 10px;">
+                        <h2>Task: {{ task.content }}</h2>
+                        <span class="badge-{{ task.priority_label.lower() }}">| Priority: {{ task.priority_label }} |</span>
+                        <span class="badge-{{ task.priority_label.lower()}}">| Due Date: {{ task.due_date if task.due_date else "Unspecified"}} |</span>
+                        <span class="badge-{{ task.priority_label.lower() }}">| Status: {{ "Done" if task.isCompleted else "Pending"}} |</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No tasks yet. Take a breather!</p>
+            {% endif %}
+        </div>
+    </body>
 </html>
