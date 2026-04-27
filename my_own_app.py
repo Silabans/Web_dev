@@ -25,7 +25,8 @@ def login():
         if user:
             if user.password == password:
                 session.close()
-                return f"Welcome back, {username}!"
+                #print(f"Welcome back, {username}!")
+                return redirect(url_for('dashboard'))
         
         session.close()
         return "Invalid credentials!\nNote: if you've never created an account before click 'Register' down below!" 
@@ -63,7 +64,7 @@ def register():
     return render_template("register.html")
 
 
-@app.route('/add', method=["POST"])
+@app.route('/add', methods=["POST"])
 def add_task():
     content = request.form.get("content")
     priority = request.form.get("priority")
@@ -84,7 +85,12 @@ def add_task():
     
     return redirect(url_for('dashboard'))
 
-
+@app.route('/dashboard', methods=["GET", "POST"])
+def dashboard():
+    session = SessionLocal()
+    tasks = session.query(Task).filter_by(user_id=1).all()
+    session.close()
+    return render_template('dashboard.html', tasks=tasks)
 
 
 #@app.route('complete-task/<int:task-id>')
