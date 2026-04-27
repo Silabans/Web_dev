@@ -71,7 +71,7 @@ def add_task():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    user_id = session.get('user)')
+    user_id = session.get('user_id')
     # gets the user id of the current user
     
     content = request.form.get("content")
