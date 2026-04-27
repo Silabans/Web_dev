@@ -5,6 +5,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = "super-secret-app-do-not-share"
+# converts the key-value pair of user_id in 'session' into a scrambled string (a cookie),
+# which acts as an encrypted code to identify users with within their session.
 
 @app.route('/')
 def home():
@@ -70,6 +72,7 @@ def add_task():
         return redirect(url_for('login'))
     
     user_id = session.get('user)')
+    # gets the user id of the current user
     
     content = request.form.get("content")
     priority = request.form.get("priority")
@@ -101,9 +104,10 @@ def dashboard():
         # returning all task objects associated with the user_id
         tasks = local_session.query(Task).filter_by(user_id=user_id).all()
         return render_template('dashboard.html', tasks=tasks)
-    
+
 @app.route('/logout')
 def logout():
+    """Logs user out to ensure data privacy and prevent data collection."""
     session.pop('user_id', None)
     return redirect(url_for('login'))
 
